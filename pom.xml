@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.guengel.astro</groupId>
+    <artifactId>astro-server-angular</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <npm-package.directory>${project.build.directory}/npm</npm-package.directory>
+        <openapi-generator-maven-plugin.ngVersion>13.2.0</openapi-generator-maven-plugin.ngVersion>
+        <openapi-generator-maven-plugin.npmRepository>https://colossus.kruemel.home/nexus/repository/astro-npm/
+        </openapi-generator-maven-plugin.npmRepository>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+        <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
+        <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
+        <maven-jar-plugin.version>3.2.1</maven-jar-plugin.version>
+        <maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
+        <maven-resources-plugin.version>3.0.0</maven-resources-plugin.version>
+        <maven-surefire-plugin.version>2.12.4</maven-surefire-plugin.version>
+        <openapi-generator-maven-plugin.version>5.3.1</openapi-generator-maven-plugin.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>mavenCentral</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+
+        <repository>
+            <id>astro-maven</id>
+            <name>Astro Maven Repository</name>
+            <url>https://colossus.kruemel.home/nexus/repository/astro/</url>
+        </repository>
+
+        <repository>
+            <id>astro-maven-snapshot</id>
+            <name>Astro Maven Repository</name>
+            <url>https://colossus.kruemel.home/nexus/repository/astro-snapshot/</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <!-- Disable plugin execution of plugins we don't need -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-resources</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-testResources</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>${maven-install-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Download and extract OpenAPI specification -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-openapi-contract</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>ch.guengel.astro.server</groupId>
+                                    <artifactId>astro-server-api</artifactId>
+                                    <version>${astro-server-api.version}</version>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <includes>openapi/astro-server.yaml</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate npm package with openapi-generator -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-typescript-angular-source</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/astro-server.yaml</inputSpec>
+                            <output>${npm-package.directory}</output>
+                            <skip>false</skip>
+                            <strictSpec>true</strictSpec>
+                            <skipValidateSpec>false</skipValidateSpec>
+                            <generatorName>typescript-angular</generatorName>
+                            <configOptions>
+                                <npmName>@astro-npm/astro-server-angular</npmName>
+                                <npmRepository>${openapi-generator-maven-plugin.npmRepository}</npmRepository>
+                                <npmVersion>${package.version}</npmVersion>
+                                <apiModulePrefix>AstroServer</apiModulePrefix>
+                                <ngVersion>${openapi-generator-maven-plugin.ngVersion}</ngVersion>
+                                <useSingleRequestParameter>true</useSingleRequestParameter>
+                                <supportsES6>true</supportsES6>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Fix issue where String variable is treated as Date object -->
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>maven-replacer-plugin</artifactId>
+                <version>${maven-replacer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>replace-code</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <ignoreMissingFile>false</ignoreMissingFile>
+                    <file>target/npm/api/openNGC.service.ts</file>
+                    <regex>false</regex>
+                    <token>encodeURIComponent(String(localTime.toISOString()))</token>
+                    <value>encodeURIComponent(localTime)</value>
+                </configuration>
+            </plugin>
+
+            <!-- Build and publish npm package -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>install-npm-dependencies</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>package-astro-server-angular</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>publish-astro-server-angular-package</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <arguments>
+                                <argument>publish</argument>
+                                <argument>dist</argument>
+                                <argument>--access=public</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
