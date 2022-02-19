@@ -40,8 +40,11 @@ pipeline {
                 configFileProvider([configFile(fileId: '4f3d0128-0fdd-4de7-8536-5cbdd54a8baf', variable: 'MAVEN_SETTINGS_XML')]) {
                     sh 'mvn -B -s "$MAVEN_SETTINGS_XML" -Dastro-server-api.version=${VERSION} -Dpackage.version=${NPM_VERSION} clean package'
                 }
-                configFileProvider([configFile(fileId: 'e5293454-b063-4d53-be2d-ecb485e4f660', targetLocation: 'target/npm/.npmrc')]) {
+                configFileProvider([configFile(fileId: 'e5293454-b063-4d53-be2d-ecb485e4f660', targetLocation: 'target/npm-astro-server/.npmrc')]) {
                     sh 'mvn -B exec:exec@publish-astro-server-angular-package'
+                }
+                configFileProvider([configFile(fileId: 'e5293454-b063-4d53-be2d-ecb485e4f660', targetLocation: 'target/npm-catalog-fetcher/.npmrc')]) {
+                    sh 'mvn -B exec:exec@publish-astro-server-catalog-fetcher-angular-package'
                 }
 
             }
