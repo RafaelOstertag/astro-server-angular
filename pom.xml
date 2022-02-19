@@ -9,7 +9,10 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <npm-package.directory>${project.build.directory}/npm</npm-package.directory>
+        <npm-package.astro-server.directory>${project.build.directory}/npm-astro-server
+        </npm-package.astro-server.directory>
+        <npm-package.catalog-fetcher.directory>${project.build.directory}/npm-catalog-fetcher
+        </npm-package.catalog-fetcher.directory>
         <openapi-generator-maven-plugin.ngVersion>13.2.0</openapi-generator-maven-plugin.ngVersion>
         <openapi-generator-maven-plugin.npmRepository>https://colossus.kruemel.home/nexus/repository/astro-npm/
         </openapi-generator-maven-plugin.npmRepository>
@@ -130,7 +133,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-openapi-contract</id>
+                        <id>unpack-openapi-contract-astro-server</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -147,6 +150,25 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+
+                    <execution>
+                        <id>unpack-openapi-contract-astro-server-catalog-fetcher</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>ch.guengel.astro.server</groupId>
+                                    <artifactId>astro-server-catalog-fetcher-api</artifactId>
+                                    <version>${astro-server-api.version}</version>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <includes>openapi/astro-server-catalog-fetcher.yaml</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
@@ -157,13 +179,13 @@
                 <version>${openapi-generator-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-typescript-angular-source</id>
+                        <id>generate-typescript-angular-source-astro-server</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${project.build.directory}/openapi/astro-server.yaml</inputSpec>
-                            <output>${npm-package.directory}</output>
+                            <output>${npm-package.astro-server.directory}</output>
                             <skip>false</skip>
                             <strictSpec>true</strictSpec>
                             <skipValidateSpec>false</skipValidateSpec>
@@ -173,6 +195,30 @@
                                 <npmRepository>${openapi-generator-maven-plugin.npmRepository}</npmRepository>
                                 <npmVersion>${package.version}</npmVersion>
                                 <apiModulePrefix>AstroServer</apiModulePrefix>
+                                <ngVersion>${openapi-generator-maven-plugin.ngVersion}</ngVersion>
+                                <useSingleRequestParameter>true</useSingleRequestParameter>
+                                <supportsES6>true</supportsES6>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>generate-typescript-angular-source-astro-server-catalog-fetcher</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/astro-server-catalog-fetcher.yaml</inputSpec>
+                            <output>${npm-package.catalog-fetcher.directory}</output>
+                            <skip>false</skip>
+                            <strictSpec>true</strictSpec>
+                            <skipValidateSpec>false</skipValidateSpec>
+                            <generatorName>typescript-angular</generatorName>
+                            <configOptions>
+                                <npmName>@astro-npm/astro-server-catalog-fetcher-angular</npmName>
+                                <npmRepository>${openapi-generator-maven-plugin.npmRepository}</npmRepository>
+                                <npmVersion>${package.version}</npmVersion>
+                                <apiModulePrefix>AstroServerCatalogFetcher</apiModulePrefix>
                                 <ngVersion>${openapi-generator-maven-plugin.ngVersion}</ngVersion>
                                 <useSingleRequestParameter>true</useSingleRequestParameter>
                                 <supportsES6>true</supportsES6>
@@ -189,20 +235,34 @@
                 <version>${maven-replacer-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>replace-code</id>
+                        <id>replace-code-astro-server</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>replace</goal>
                         </goals>
+                        <configuration>
+                            <ignoreMissingFile>false</ignoreMissingFile>
+                            <file>target/npm-astro-server/api/openNGC.service.ts</file>
+                            <regex>false</regex>
+                            <token>encodeURIComponent(String(localTime.toISOString()))</token>
+                            <value>encodeURIComponent(localTime)</value>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>replace-code-catalog-fetcher</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <ignoreMissingFile>false</ignoreMissingFile>
+                            <file>target/npm-catalog-fetcher/api/openNGCCatalog.service.ts</file>
+                            <regex>false</regex>
+                            <token>encodeURIComponent(String(localTime.toISOString()))</token>
+                            <value>encodeURIComponent(localTime)</value>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <ignoreMissingFile>false</ignoreMissingFile>
-                    <file>target/npm/api/openNGC.service.ts</file>
-                    <regex>false</regex>
-                    <token>encodeURIComponent(String(localTime.toISOString()))</token>
-                    <value>encodeURIComponent(localTime)</value>
-                </configuration>
             </plugin>
 
             <!-- Build and publish npm package -->
@@ -211,8 +271,9 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>${exec-maven-plugin.version}</version>
                 <executions>
+                    <!-- Astro Server -->
                     <execution>
-                        <id>install-npm-dependencies</id>
+                        <id>install-npm-dependencies-astro-server</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>exec</goal>
@@ -220,7 +281,7 @@
 
                         <configuration>
                             <executable>npm</executable>
-                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <workingDirectory>${npm-package.astro-server.directory}</workingDirectory>
                             <arguments>
                                 <argument>install</argument>
                             </arguments>
@@ -236,7 +297,7 @@
 
                         <configuration>
                             <executable>npm</executable>
-                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <workingDirectory>${npm-package.astro-server.directory}</workingDirectory>
                             <arguments>
                                 <argument>run</argument>
                                 <argument>build</argument>
@@ -253,7 +314,59 @@
 
                         <configuration>
                             <executable>npm</executable>
-                            <workingDirectory>${npm-package.directory}</workingDirectory>
+                            <workingDirectory>${npm-package.astro-server.directory}</workingDirectory>
+                            <arguments>
+                                <argument>publish</argument>
+                                <argument>dist</argument>
+                                <argument>--access=public</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Astro Server Catalog Fetcher-->
+                    <execution>
+                        <id>install-npm-dependencies-catalog-fetcher</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.catalog-fetcher.directory}</workingDirectory>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>package-astro-server-catalog-fetcher-angular</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.catalog-fetcher.directory}</workingDirectory>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>publish-astro-server-catalog-fetcher-angular-package</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+
+                        <configuration>
+                            <executable>npm</executable>
+                            <workingDirectory>${npm-package.catalog-fetcher.directory}</workingDirectory>
                             <arguments>
                                 <argument>publish</argument>
                                 <argument>dist</argument>
