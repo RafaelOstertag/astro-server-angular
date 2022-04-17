@@ -1,0 +1,65 @@
+version: 2.1
+
+parameters:
+  version:
+    type: string
+    default: none
+
+
+jobs:
+  build-npm-packages:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Install node
+          command: |
+            nvm install lts/fermium && \
+            nvm use lts/fermium && \
+            nvm alias default lts/fermium
+      - run:
+          command: nvm use lts/fermium && node --version
+      - run:
+          environment:
+            VERSION: <<pipeline.parameters.version>>
+          name: Generate npm packages
+          command: |
+            nvm use lts/fermium &&\
+            NPM_VERSION=$(echo "${VERSION}" | sed -e "s/-SNAPSHOT\$/-dev.$CIRCLE_BUILD_NUM/") && \
+            echo "****" && \
+            echo "VERSION: ${VERSION}" && \
+            echo "NPM_VERSION: ${NPM_VERSION}" && \
+            echo "****" && \
+            mvn -B -s "${HOME}/project/.circleci/settings.xml" -Dastro-server-api.version="${VERSION}" -Dpackage.version="${NPM_VERSION}" clean package
+      - run:
+          name: Login to registry
+          command: |
+            nvm use lts/fermium &&\
+            npm set '//rafaelostertag.jfrog.io/artifactory/api/npm/local-npm/:_authToken' "${NPM_TOKEN}"
+      - run:
+          name: Publish astro server
+          command: |
+            nvm use lts/fermium &&\
+            mvn -B exec:exec@publish-astro-server-angular-package
+      - run:
+          name: Publish astro server catalog fetcher
+          command: |
+            nvm use lts/fermium &&\
+            mvn -B exec:exec@publish-astro-server-catalog-fetcher-angular-package
+
+workflows:
+  version: 2
+  build-npm-packages:
+    when:
+      not:
+        or:
+          - equal: [ none, <<pipeline.parameters.version>> ]
+          - equal: [ "", <<pipeline.parameters.version>> ]
+    jobs:
+      - build-npm-packages:
+          context:
+            - npm-repository-write
+            - repository-read
+

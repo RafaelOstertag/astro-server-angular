@@ -14,7 +14,7 @@
         <npm-package.catalog-fetcher.directory>${project.build.directory}/npm-catalog-fetcher
         </npm-package.catalog-fetcher.directory>
         <openapi-generator-maven-plugin.ngVersion>13.2.0</openapi-generator-maven-plugin.ngVersion>
-        <openapi-generator-maven-plugin.npmRepository>https://colossus.kruemel.home/nexus/repository/astro-npm/
+        <openapi-generator-maven-plugin.npmRepository>https://rafaelostertag.jfrog.io/artifactory/api/npm/local-npm/
         </openapi-generator-maven-plugin.npmRepository>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -37,15 +37,8 @@
         </repository>
 
         <repository>
-            <id>astro-maven</id>
-            <name>Astro Maven Repository</name>
-            <url>https://colossus.kruemel.home/nexus/repository/astro/</url>
-        </repository>
-
-        <repository>
-            <id>astro-maven-snapshot</id>
-            <name>Astro Maven Repository</name>
-            <url>https://colossus.kruemel.home/nexus/repository/astro-snapshot/</url>
+            <id>rafaelostertag.jfrog.io</id>
+            <url>https://rafaelostertag.jfrog.io/artifactory/maven</url>
         </repository>
     </repositories>
 
@@ -191,7 +184,7 @@
                             <skipValidateSpec>false</skipValidateSpec>
                             <generatorName>typescript-angular</generatorName>
                             <configOptions>
-                                <npmName>@astro-npm/astro-server-angular</npmName>
+                                <npmName>@rafaelostertag/astro-server-angular</npmName>
                                 <npmRepository>${openapi-generator-maven-plugin.npmRepository}</npmRepository>
                                 <npmVersion>${package.version}</npmVersion>
                                 <apiModulePrefix>AstroServer</apiModulePrefix>
@@ -215,7 +208,7 @@
                             <skipValidateSpec>false</skipValidateSpec>
                             <generatorName>typescript-angular</generatorName>
                             <configOptions>
-                                <npmName>@astro-npm/astro-server-catalog-fetcher-angular</npmName>
+                                <npmName>@rafaelostertag/astro-server-catalog-fetcher-angular</npmName>
                                 <npmRepository>${openapi-generator-maven-plugin.npmRepository}</npmRepository>
                                 <npmVersion>${package.version}</npmVersion>
                                 <apiModulePrefix>AstroServerCatalogFetcher</apiModulePrefix>
