@@ -16,8 +16,8 @@ jobs:
       - run:
           name: Install node
           command: |
-            nvm install lts/fermium && \
-            nvm use lts/fermium && \
+            nvm install lts/fermium
+            nvm use lts/fermium
             nvm alias default lts/fermium
       - run:
           command: nvm use lts/fermium && node --version
@@ -26,12 +26,13 @@ jobs:
             VERSION: <<pipeline.parameters.version>>
           name: Generate npm packages
           command: |
-            nvm use lts/fermium &&\
-            NPM_VERSION=$(echo "${VERSION}" | sed -e "s/-SNAPSHOT\$/-dev.$CIRCLE_BUILD_NUM/") && \
-            echo "****" && \
-            echo "VERSION: ${VERSION}" && \
-            echo "NPM_VERSION: ${NPM_VERSION}" && \
-            echo "****" && \
+            nvm use lts/fermium
+            node --version
+            NPM_VERSION=$(echo "${VERSION}" | sed -e "s/-SNAPSHOT\$/-dev.$CIRCLE_BUILD_NUM/")
+            echo "****"
+            echo "VERSION: ${VERSION}"
+            echo "NPM_VERSION: ${NPM_VERSION}"
+            echo "****"
             mvn -B -s "${HOME}/project/.circleci/settings.xml" -Dastro-server-api.version="${VERSION}" -Dpackage.version="${NPM_VERSION}" clean package
       - run:
           name: Login to registry
@@ -41,12 +42,12 @@ jobs:
       - run:
           name: Publish astro server
           command: |
-            nvm use lts/fermium &&\
+            nvm use lts/fermium
             mvn -B exec:exec@publish-astro-server-angular-package
       - run:
           name: Publish astro server catalog fetcher
           command: |
-            nvm use lts/fermium &&\
+            nvm use lts/fermium
             mvn -B exec:exec@publish-astro-server-catalog-fetcher-angular-package
 
 workflows:
