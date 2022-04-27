@@ -17,10 +17,6 @@ jobs:
           name: Install node
           command: |
             nvm install lts/fermium
-            nvm use lts/fermium
-            nvm alias default lts/fermium
-      - run:
-          command: nvm use lts/fermium && node --version
       - run:
           environment:
             VERSION: <<pipeline.parameters.version>>
@@ -37,7 +33,7 @@ jobs:
       - run:
           name: Login to registry
           command: |
-            nvm use lts/fermium &&\
+            nvm use lts/fermium
             npm set '//rafaelostertag.jfrog.io/artifactory/api/npm/local-npm/:_authToken' "${NPM_TOKEN}"
       - run:
           name: Publish astro server
