@@ -16,7 +16,9 @@ jobs:
       - run:
           name: Install node
           command: |
-            nvm install lts/fermium
+            nvm deactivate
+            nvm uninstall --lts=fermium
+            nvm install --lts=fermium
       - run:
           environment:
             VERSION: <<pipeline.parameters.version>>
