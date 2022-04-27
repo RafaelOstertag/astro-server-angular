@@ -58,6 +58,7 @@ workflows:
           - equal: [ "", <<pipeline.parameters.version>> ]
     jobs:
       - build-npm-packages:
+          name: Build NPM packages <<pipeline.parameters.version>>
           context:
             - npm-repository-write
             - repository-read
